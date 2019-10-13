@@ -1,0 +1,1 @@
+https://github.com/myfreeer/aria2-build-msys2/releases

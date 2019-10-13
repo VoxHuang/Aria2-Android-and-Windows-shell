@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job>
+<script language="VBScript" charset="UTF-8"><![CDATA[
+Option Explicit
+Dim CDIR,CORE,CONF,PROCESSLIST
+If LCase(Right(WScript.fullname,11))="wscript.exe" Then
+	CreateObject("wscript.shell").run("cscript.exe"&" "&""""&WScript.scriptfullname&""""),0
+	WScript.quit
+End If
+On Error Resume Next
+CDIR=Left(WScript.scriptfullname,Len(WScript.scriptfullname)-Len(WScript.scriptname))
+CORE=CDIR&"aria2c.exe"
+CONF=CDIR&"aria2.conf"
+Sub CHECK()
+	Set PROCESSLIST=GetObject("winmgmts:\\.\root\cimv2").execquery("select * from win32_process where name='aria2c.exe'")
+End Sub
+Do While True
+	CHECK
+	If PROCESSLIST.count=0 Then
+		CreateObject("wscript.shell").run(""""&CORE&""""&" "&"--conf-path="&""""&CONF&""""),0
+		Set PROCESSLIST=Nothing:WScript.sleep 100:CHECK
+		If PROCESSLIST.count=0 Then
+			Exit Do
+		End If
+	Else
+		Set PROCESSLIST=Nothing:WScript.sleep 60000
+	End If
+Loop
+]]></script>
+</job>

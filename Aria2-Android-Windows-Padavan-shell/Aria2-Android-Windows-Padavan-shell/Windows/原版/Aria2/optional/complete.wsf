@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<job>
+<script language="VBScript" charset="UTF-8"><![CDATA[
+Option Explicit
+Dim CDIR,CONF,FSO,FILE,READ,DDIR,PROG,AUDIO,PLAYER
+If LCase(Right(WScript.fullname,11))="cscript.exe" Then
+	CreateObject("wscript.shell").run("wscript.exe"&" "&""""&WScript.scriptfullname&""""),0
+	WScript.quit
+End If
+On Error Resume Next
+CDIR=Left(WScript.scriptfullname,Len(WScript.scriptfullname)-Len(WScript.scriptname))
+CONF=CDIR&"aria2.conf"
+Set FSO=CreateObject("scripting.filesystemobject")
+If FSO.getfile(CONF).size>0 Then
+	Set FILE=FSO.opentextfile(CONF)
+	Do Until FILE.atendofstream
+		READ=FILE.readline
+		If InStr(READ,"dir=")>0 Then
+			If (Split(READ,"=")(0))="dir" Then
+				DDIR=(Split(READ,"=")(1))
+				Exit Do
+			End If
+		End If
+	Loop
+	FILE.close
+	Set FILE=Nothing
+	If FSO.folderexists(DDIR) Then
+		For Each FILE In FSO.getfolder(DDIR).files
+			If FSO.getextensionname(FILE)="aria2" Then
+				WScript.quit
+			End If
+		Next
+		PROG=CreateObject("wscript.shell").expandenvironmentstrings("%ProgramFiles%\Windows Media Player\wmplayer.exe")
+		AUDIO=CDIR&"complete.wav"
+		If FSO.getfile(PROG).size>0 Then
+			If FSO.fileexists(AUDIO) Then
+				If FSO.getfile(AUDIO).size>0 Then
+					Set PLAYER=CreateObject("wmplayer.ocx")
+					PLAYER.url=(AUDIO)
+					Do Until PLAYER.playstate=1
+						WScript.sleep 1000
+						If PLAYER.playstate>8 Then
+							Exit Do
+						End If
+					Loop
+				End If
+			Else
+				Set FILE=FSO.createtextfile(AUDIO)
+				FILE.close
+				Set FILE=Nothing
+			End If
+		End If
+	End If
+End If
+WScript.quit
+]]></script>
+</job>
